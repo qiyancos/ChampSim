@@ -1,18 +1,39 @@
 #!/bin/bash
+root=`dirname $0`
+cd $root/..
 
-if [ "$#" -ne 7 ]; then
-    echo "Illegal number of parameters"
-    echo "Usage: ./build_champsim.sh [branch_pred] [l1d_pref] [l2c_pref] [llc_pref] [llc_repl] [num_core]"
+if [ $# != 7 -a $# != 1 ]
+then
+    echo "Illegal number of parameters($#)"
+    echo "Usage: ./build_champsim.sh [Options] [branch_pred] [l1d_pref] [l2c_pref] [llc_pref] [llc_repl] [num_core]"
+    echo "    -l, --list    List all the available branch predictors, prefetchers, replace policies"
     exit 1
 fi
 
+if [ $# = 1 ] && [ $1 = -l -o $1 = --list ]
+then
+    name=`ls ./branch | grep "bpred.cpp" | sed 's/\.bpred\.cpp//g'`
+    echo -n "-- Branch Predictor: "; echo $name
+    name=`ls ./prefetcher | grep "l1i_pref.cpp" | sed 's/\.l1i_pref\.cpp//g'`
+    echo -n "-- Prefetcher(L1 ICache): "; echo $name
+    name=`ls ./prefetcher | grep "l1d_pref.cpp" | sed 's/\.l1d_pref\.cpp//g'`
+    echo -n "-- Prefetcher(L1 DCache): "; echo $name
+    name=`ls ./prefetcher | grep "l2c_pref.cpp" | sed 's/\.l2c_pref\.cpp//g'`
+    echo -n "-- Prefetcher(L2 Cache): "; echo $name
+    name=`ls ./prefetcher | grep "llc_pref.cpp" | sed 's/\.llc_pref\.cpp//g'`
+    echo -n "-- Prefetcher(Last Level Cache): "; echo $name
+    name=`ls ./replacement | grep "llc_repl.cpp" | sed 's/\.llc_repl\.cpp//g'`
+    echo -n "-- Replace Policy: "; echo $name
+    exit 0
+fi
+
 # ChampSim configuration
-BRANCH=$1           # branch/*.bpred
-L1I_PREFETCHER=$2   # prefetcher/*.l1i_pref
-L1D_PREFETCHER=$3   # prefetcher/*.l1d_pref
-L2C_PREFETCHER=$4   # prefetcher/*.l2c_pref
-LLC_PREFETCHER=$5   # prefetcher/*.llc_pref
-LLC_REPLACEMENT=$6  # replacement/*.llc_repl
+BRANCH=$1           # branch/*.bpred.cpp
+L1I_PREFETCHER=$2   # prefetcher/*.l1i_pref.cpp
+L1D_PREFETCHER=$3   # prefetcher/*.l1d_pref.cpp
+L2C_PREFETCHER=$4   # prefetcher/*.l2c_pref.cpp
+LLC_PREFETCHER=$5   # prefetcher/*.llc_pref.cpp
+LLC_REPLACEMENT=$6  # replacement/*.llc_repl.cpp
 NUM_CORE=$7         # tested up to 8-core system
 
 ############## Some useful macros ###############
@@ -21,45 +42,45 @@ NORMAL=$(tput sgr0)
 #################################################
 
 # Sanity check
-if [ ! -f ./branch/${BRANCH}.bpred ]; then
+if [ ! -f ./branch/${BRANCH}.bpred.cpp ]; then
     echo "[ERROR] Cannot find branch predictor"
-	echo "[ERROR] Possible branch predictors from branch/*.bpred "
-    find branch -name "*.bpred"
+	echo "[ERROR] Possible branch predictors from branch/*.bpred.cpp "
+    find branch -name "*.bpred.cpp"
     exit 1
 fi
 
-if [ ! -f ./prefetcher/${L1I_PREFETCHER}.l1i_pref ]; then
+if [ ! -f ./prefetcher/${L1I_PREFETCHER}.l1i_pref.cpp ]; then
     echo "[ERROR] Cannot find L1I prefetcher"
-	echo "[ERROR] Possible L1I prefetchers from prefetcher/*.l1i_pref "
-    find prefetcher -name "*.l1i_pref"
+	echo "[ERROR] Possible L1I prefetchers from prefetcher/*.l1i_pref.cpp "
+    find prefetcher -name "*.l1i_pref.cpp"
     exit 1
 fi
 
-if [ ! -f ./prefetcher/${L1D_PREFETCHER}.l1d_pref ]; then
+if [ ! -f ./prefetcher/${L1D_PREFETCHER}.l1d_pref.cpp ]; then
     echo "[ERROR] Cannot find L1D prefetcher"
-	echo "[ERROR] Possible L1D prefetchers from prefetcher/*.l1d_pref "
-    find prefetcher -name "*.l1d_pref"
+	echo "[ERROR] Possible L1D prefetchers from prefetcher/*.l1d_pref.cpp "
+    find prefetcher -name "*.l1d_pref.cpp"
     exit 1
 fi
 
-if [ ! -f ./prefetcher/${L2C_PREFETCHER}.l2c_pref ]; then
+if [ ! -f ./prefetcher/${L2C_PREFETCHER}.l2c_pref.cpp ]; then
     echo "[ERROR] Cannot find L2C prefetcher"
-	echo "[ERROR] Possible L2C prefetchers from prefetcher/*.l2c_pref "
-    find prefetcher -name "*.l2c_pref"
+	echo "[ERROR] Possible L2C prefetchers from prefetcher/*.l2c_pref.cpp "
+    find prefetcher -name "*.l2c_pref.cpp"
     exit 1
 fi
 
-if [ ! -f ./prefetcher/${LLC_PREFETCHER}.llc_pref ]; then
+if [ ! -f ./prefetcher/${LLC_PREFETCHER}.llc_pref.cpp ]; then
     echo "[ERROR] Cannot find LLC prefetcher"
-	echo "[ERROR] Possible LLC prefetchers from prefetcher/*.llc_pref "
-    find prefetcher -name "*.llc_pref"
+	echo "[ERROR] Possible LLC prefetchers from prefetcher/*.llc_pref.cpp "
+    find prefetcher -name "*.llc_pref.cpp"
     exit 1
 fi
 
-if [ ! -f ./replacement/${LLC_REPLACEMENT}.llc_repl ]; then
+if [ ! -f ./replacement/${LLC_REPLACEMENT}.llc_repl.cpp ]; then
     echo "[ERROR] Cannot find LLC replacement policy"
-	echo "[ERROR] Possible LLC replacement policy from replacement/*.llc_repl"
-    find replacement -name "*.llc_repl"
+	echo "[ERROR] Possible LLC replacement policy from replacement/*.llc_repl.cpp "
+    find replacement -name "*.llc_repl.cpp"
     exit 1
 fi
 

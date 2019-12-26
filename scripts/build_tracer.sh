@@ -2,7 +2,7 @@
 objDir=obj-intel64
 root=`dirname $0`
 oldDir=$PWD
-cd $root
+cd $root/../tracer
 root=$PWD
 
 if [ x$1 = x -o x$1 = -hx ]
@@ -26,3 +26,4 @@ echo "--Pin Directory: $pinDir"
 mkdir -p ./$objDir
 make PIN_ROOT=$pinDir ./$objDir/champsim_tracer.so
 ln -s $pinDir/pin ./$objDir/pin
+cp $objDir/* $root/../bin/

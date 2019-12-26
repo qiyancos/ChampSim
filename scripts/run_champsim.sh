@@ -1,4 +1,6 @@
 #!/bin/bash
+root=`dirname $0`
+cd $root/..
 
 if [ "$#" -lt 8 ] || [ "$#" -gt 9 ]; then
     echo "Illegal number of parameters"
