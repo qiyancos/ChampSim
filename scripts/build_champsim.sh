@@ -109,7 +109,6 @@ do
     done < $opFile
 done
 RUNMSG "-- Settings Apply Finished."
-exit
 
 source $root/scripts/set_key_unit.sh
 binName="${BRANCH}-${L1I_PREFETCHER}-${L1D_PREFETCHER}"
@@ -122,6 +121,7 @@ rm -f bin/champsim
 make clean
 mkdir -p bin
 make
+$root/scripts/set_key_unit.sh -reset
 
 # Sanity check
 echo ""
@@ -139,6 +139,5 @@ echo "    L1D Prefetcher: ${L1D_PREFETCHER}"
 echo "    L2C Prefetcher: ${L2C_PREFETCHER}"
 echo "    LLC Prefetcher: ${LLC_PREFETCHER}"
 echo "    LLC Replacement: ${LLC_REPLACEMENT}"
-echo ""
 mv bin/champsim bin/$binName
 RUNMSG "-- Saved as $root/bin/$binName"

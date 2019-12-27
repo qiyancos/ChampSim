@@ -104,7 +104,7 @@ stlbLatency, #define STLB_LATENCY, #define STLB_LATENCY $$, inc/cache.h
 
 # DRAM Basic Settings
 dramChannels, #define DRAM_CHANNELS, #define DRAM_CHANNELS $$, inc/champsim.h
-log2DramChannels, #define LOG2_DRAM_CHANNELS, #define LOG2_DRAM_CHANNELS, inc/champsim.h
+log2DramChannels, #define LOG2_DRAM_CHANNELS, #define LOG2_DRAM_CHANNELS $$, inc/champsim.h
 dramRanks, #define DRAM_RANKS, #define DRAM_RANKS $$, inc/champsim.h
 log2DramRanks, #define LOG2_DRAM_RANKS, #define LOG2_DRAM_RANKS $$, inc/champsim.h
 dramBanks, #define DRAM_BANKS, #define DRAM_BANKS $$, inc/champsim.h
@@ -112,7 +112,7 @@ log2DramBanks, #define LOG2_DRAM_BANKS, #define LOG2_DRAM_BANKS $$, inc/champsim
 dramRows, #define DRAM_ROWS, #define DRAM_ROWS $$, inc/champsim.h
 log2DramRows, #define LOG2_DRAM_ROWS, #define LOG2_DRAM_ROWS $$, inc/champsim.h
 dramColumns, #define DRAM_COLUMNS, #define DRAM_COLUMNS $$, inc/champsim.h
-log2DramColumns, #define LOG2_DRAM_COLUMNS, #define LOG2_DRAM_COLUMNS ##, inc/champsim.h
+log2DramColumns, #define LOG2_DRAM_COLUMNS, #define LOG2_DRAM_COLUMNS $$, inc/champsim.h
 
 # DRAM Detailed Settings
 dramIOFreq, #define DRAM_IO_FREQ, #define DRAM_IO_FREQ $$, inc/champsim.h

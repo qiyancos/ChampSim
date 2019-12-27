@@ -1,6 +1,7 @@
 #!/bin/bash
 root=`dirname $0`
 cd $root/..
+root=$PWD
 
 if [ x$1 = x-reset ]
 then
