@@ -23,7 +23,7 @@ decodeWidth, #define DECODE_WIDTH, #define DECODE_WIDTH $$, inc/ooo_cpu.h
 execWidth, #define EXEC_WIDTH, #define EXEC_WIDTH $$, inc/ooo_cpu.h
 loadQueueWidth, #define LQ_WIDTH, #define LQ_WIDTH $$, inc/ooo_cpu.h
 storeQueueWidth, #define SQ_WIDTH, #define SQ_WIDTH $$, inc/ooo_cpu.h
-retireWidth, #define RETIRE_WIDTH, #define RETIRE_WIDTH $$, inc/oo_cpu.h
+retireWidth, #define RETIRE_WIDTH, #define RETIRE_WIDTH $$, inc/ooo_cpu.h
 
 schedulerSize, #define SCHEDULER_SIZE, #define SCHEDULER_SIZE $$, inc/ooo_cpu.h
 branchMissPredPenalty, #define BRANCH_MISPREDICT_PENALTY, #define BRANCH_MISPREDICT_PENALTY $$, inc/ooo_cpu.h

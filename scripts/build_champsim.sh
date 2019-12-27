@@ -6,10 +6,11 @@ source $root/scripts/lib/shimport $root/scripts/lib
 shimport color_scheme.shh
 # shimport basic_func.shh
 
-if [ x$1 = x -o x$1 = x-h ]
+if [ x$1 = x -o x$1 = x-h ] 
 then
     echo "Usage: ./build_champsim.sh [Options] [Config Files]"
     echo "    -l, --list    List all the available branch predictors, prefetchers, replace policies"
+    echo "    -b, --build   Build ChampSim with given config files."
     echo "    Config Files  Config files must be given to modify system settings."
     echo "                  default: $root/scripts/config/system.ini"
     exit 1
@@ -30,17 +31,24 @@ then
     name=`ls ./replacement | grep "llc_repl.cpp" | sed 's/\.llc_repl\.cpp//g'`
     WARNTLN "-- Replace Policy: "; echo $name
     exit 0
+elif [ x$1 = x-b -o x$1 = x--build ]
+then
+    if [ $# = 1 ]
+    then configs=$root/scripts/config/system.ini
+    else
+        shift
+        configs="$*"
+    fi
+else
+    ERROR "Arguments \"$1\" not available! Use -h for help."
+    exit -1
 fi
 
-if [ $# = 0 ]
-then configs=$root/scripts/config/system.ini
-else configs="$*"
-fi
 
 RUNMSG ">> Applying Settings..."
 for config in $configs
 do
-    opFile=`echo $config | sed 's/.*ini/\1op/'`
+    opFile=`echo $config | sed 's/\(.*\)ini/\1op/'`
     if [ ! -f $config ]
     then
         ERROR "No such file or directory \"$config\""
@@ -50,43 +58,44 @@ do
         ERROR "No matched operation file \"$opFIle\""
         exit -1
     fi
-    source bash $config
+    source $config
     lineNum=0
     while read operation
     do
         lineNum=$[lineNum + 1]
         operation=`echo $operation | sed 's/[ \t]*\(.*\)/\1/g'`
-        if [ x$operation = x ] || [ x${operation:0:1} = x# ] 
+        if [ "x$operation" = x ] || [ x${operation:0:1} = x# ] 
         then continue
         fi
         operation=(`echo $operation | sed -e 's/ /@/g' -e 's/,/ /g'`)
         paramName=`echo ${operation[0]} | sed 's/@/ /g'`
-        originString=`echo ${operation[1]} | sed 's/@/ /g'`
-        targetFile=`echo ${operation[3]} | sed 's/@/ /g'`
-        paramVal=`eval echo \$$paramName`
-        newString=`echo ${operation[2]} | sed -e 's/@/ /g' -e "s/\$\$/$paramVal/g"`
+        originString=`echo ${operation[1]} | sed -e 's/@/ /g' -e 's/[ \t]*\(.*\)/\1/g'`
+        targetFile=`echo ${operation[3]} | sed -e 's/@/ /g' -e 's/[ \t]*\(.*\)/\1/g'`
+        paramVal=$(eval echo \$$paramName)
+        newString=`echo ${operation[2]} | sed -e 's/@/ /g' -e 's/[ \t]*\(.*\)/\1/g'`
+        newString=`echo $newString | sed "s/\\\\$\\\\$/$paramVal/g"`
         if [ x$paramVal = x ]
         then
             WARN "Param $paramName not defined! Operation is skipped."
             continue
-        elif [ x$targetFile = x ] || [ ! -f $targetFile]
+        elif [ "x$targetFile" = x -o ! -f $targetFile ]
         then
-            ERRORN "No target file specified or file not exits \"$targetFile\""
+            ERROR "No target file specified or file not exits \"$targetFile\""
             echo "Line $lineNum in file $opFile."
             exit -1
         fi
-        RUNMSGL "-- Param: $paramName; Value $paramVal"
+        echo "-- Param: $paramName; Value: $paramVal"
         if [ ${paramName:0:3} = use ]
         then
-            if [[ $paramVal =~ ([yY]es|[nN]o|YES|NO ]]
+            if [[ $paramVal =~ [yY]es|[nN]o|YES|NO ]]
             then
                 if [[ ${paramVal:0:1} =~ [yY] ]]
                 then
-                    #eval "sed \"/$newString/c\ $originString\" $targetFile"
-                    echo sed \"/$newString/c\ $originString\" $targetFile
+                    eval "sed -i \"/$newString/c\\$originString\" $targetFile"
+                    # echo sed -i \"/$newString/c\\$originString\" $targetFile
                 else
-                    #eval "sed \"/$originString/c\ $newString\" $targetFile"
-                    echo sed \"/$originString/c\ $newString\" $targetFile
+                    eval "sed -i \"/$originString/c\\$newString\" $targetFile"
+                    # echo sed -i \"/$originString/c\\$newString\" $targetFile
                 fi
             else
                 ERROR "Param $paramName illegal!"
@@ -94,14 +103,15 @@ do
                 exit -1
             fi
         else
-            #eval "sed \"/$originString/c\ $newString\" $targetFile"
-            echo sed \"/$originString/c\ $newString\" $targetFile
+            eval "sed -i \"/$originString/c\\$newString\" $targetFile"
+            # echo sed -i \"/$originString/c\\$newString\" $targetFile
         fi
     done < $opFile
 done
 RUNMSG "-- Settings Apply Finished."
+exit
 
-source bash $root/scripts/set_key_unit.sh
+source $root/scripts/set_key_unit.sh
 binName="${BRANCH}-${L1I_PREFETCHER}-${L1D_PREFETCHER}"
 binName="$binName-${L2C_PREFETCHER}-${LLC_PREFETCHER}"
 binName="$binName-${LLC_REPLACEMENT}-${numCPUs}core-champsim"

@@ -33,7 +33,7 @@
 #endif
 
 // CPU
-#define NUM_CPUS 1
+#define NUM_CPUS 4
 #define CPU_FREQ 4000
 #define DRAM_IO_FREQ 3200
 #define PAGE_SIZE 4096
@@ -56,16 +56,16 @@
 #define FILL_DRAM 16
 
 // DRAM
-#define DRAM_CHANNELS 1      // default: assuming one DIMM per one channel 4GB * 1 => 4GB off-chip memory
-#define LOG2_DRAM_CHANNELS 0
-#define DRAM_RANKS 1         // 512MB * 8 ranks => 4GB per DIMM
+#define DRAM_CHANNELS 1
+#define LOG2_DRAM_CHANNELS
+#define DRAM_RANKS 1
 #define LOG2_DRAM_RANKS 0
-#define DRAM_BANKS 8         // 64MB * 8 banks => 512MB per rank
+#define DRAM_BANKS 8
 #define LOG2_DRAM_BANKS 3
-#define DRAM_ROWS 65536      // 2KB * 32K rows => 64MB per bank
+#define DRAM_ROWS 65536
 #define LOG2_DRAM_ROWS 16
-#define DRAM_COLUMNS 128      // 64B * 32 column chunks (Assuming 1B DRAM cell * 8 chips * 8 transactions = 64B size of column chunks) => 2KB per row
-#define LOG2_DRAM_COLUMNS 7
+#define DRAM_COLUMNS 128
+#define LOG2_DRAM_COLUMNS ##
 #define DRAM_ROW_SIZE (BLOCK_SIZE*DRAM_COLUMNS/1024)
 
 #define DRAM_SIZE (DRAM_CHANNELS*DRAM_RANKS*DRAM_BANKS*DRAM_ROWS*DRAM_ROW_SIZE/1024) 

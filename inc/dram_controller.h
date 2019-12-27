@@ -4,11 +4,11 @@
 #include "memory_class.h"
 
 // DRAM configuration
-#define DRAM_CHANNEL_WIDTH 8 // 8B
+#define DRAM_CHANNEL_WIDTH 8
 #define DRAM_WQ_SIZE 64
 #define DRAM_RQ_SIZE 64
 
-#define tRP_DRAM_NANOSECONDS  12.5
+#define tRP_DRAM_NANOSECONDS 12.5
 #define tRCD_DRAM_NANOSECONDS 12.5
 #define tCAS_DRAM_NANOSECONDS 12.5
 

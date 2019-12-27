@@ -14,12 +14,12 @@ then
 fi
 
 # ChampSim configuration
-BRANCH=$1           
-L1I_PREFETCHER=$2   
-L1D_PREFETCHER=$3   
-L2C_PREFETCHER=$4   
-LLC_PREFETCHER=$5   
-LLC_REPLACEMENT=$6  
+BRANCH=perceptron
+L1I_PREFETCHER=next_line
+L1D_PREFETCHER=next_line
+L2C_PREFETCHER=kpcp
+LLC_PREFETCHER=next_line
+LLC_REPLACEMENT=lru
 
 # Sanity check
 if [ ! -f ./branch/${BRANCH}.bpred.cpp ]; then
