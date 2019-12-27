@@ -1,0 +1,104 @@
+#! /bin/bash
+if [ x$_SHIMPORT_ = x ]
+then
+	echo "Error: Can not run without shimport!"
+	exit 1
+fi
+
+__GbasicFuncTest="__G"
+if [ x$__GbasicFuncTest != x ]
+then
+ 	echo "Error: basic_func.shh can not be imported with a named namespace\"__G\""
+ 	exit 1
+fi
+
+shimport color_scheme.shh
+
+__Ghelp(){
+	echo "Error: Help function not impelmented yet!"
+}
+
+__GsetArgs(){
+	# this function cannot be used for calling functions in this file
+	__G_funcName=${FUNCNAME[1]}
+	unset __G_funcArgs
+	unset __G_retVal
+	__G_funcArgsCnt=$#
+	__G_funcArgs=($# $*)
+	# The two variables above are only used for __GcheckArgs
+}
+
+__GreturnArgs(){
+	__G_retVal=($*)
+}
+
+__Gabandon(){
+	if [ $# != 1 ]
+	then
+		ERROR "Internal error occurred when exiting!"
+		exit 1
+	elif [ $1 = 0 ]
+	then exit 0
+	fi
+	ERROR "Error occurred in function [${FUNCNAME[1]}]:"
+    echo "Returned with error code ($1)"
+    echo "Function Call Backtrace:"
+	__Lindex=1
+	for __Lfunc in ${FUNCNAME[*]}
+	do
+		echo $__Lindex. $__Lfunc
+		__Lindex=$[__Lindex + 1]
+	done
+	exit $1
+}
+
+__GcheckRun(){
+	$*
+    __LerrCode=$?
+    if [ $__LerrCode != 0 ]
+    then
+        ERROR "Error occurred while running the command line in function [${FUNCNAME[1]}]:"
+        ERRORTL "\t\"$*\""
+        echo "Returned with error code ($__LerrCode)"
+        echo "Function Call Backtrace: ${FUNCNAME[*]}"
+		exit $__LerrCode
+    fi
+}
+
+__GcheckArgs(){
+	if [ "x`echo $1 | grep '$#\|$@\|$?\|$[0-9]'`" != x ]
+	then
+		ERROR "Basic func error: Cannot use this func with local variable!"
+		exit 1
+	fi
+	if [ ! `eval echo $1` ]
+    then
+		ERROR "Invalid argument for function [${FUNCNAME[1]}]: ($1)"
+        ERROR "Error Infomation: $2"
+		exit 1
+    fi
+}
+
+shopt -s  expand_aliases
+alias __GisNumber="__LisNumber 0"
+alias __GisAllNumber="__LisNumber 1"
+
+__LisNumber(){
+	_isNumberArgsCnt=$#
+	__GcheckArgs '$_isNumberArgsCnt -gt 1'
+	__LcheckAll=$1
+	unset __LcheckResult
+	shift
+	for __Larg in $*
+	do
+		if [[ ! "$__Larg" =~ ^([1-9][0-9]*|0)$ ]]
+		then __LcheckResult="$__LcheckResult 1"
+		elif [ $__LcheckAll = 1 ]
+		then echo 0; return
+		else __LcheckResult="$__LcheckResult 0"
+		fi
+	done
+	if [ $__LcheckAll != 1 ]
+	then echo $__LcheckResult
+	fi
+}

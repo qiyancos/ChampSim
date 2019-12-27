@@ -1,7 +1,6 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
-
 // instruction format
 #define ROB_SIZE 352
 #define LQ_SIZE 128

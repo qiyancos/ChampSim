@@ -1,0 +1,124 @@
+# TargetParam, OriginString, NewString, File
+# Global Settings
+useSanityCheck, #define SANITY_CHECK, #undef SANITY_CHECK, inc/champsim.h
+useLLCBypass, #define LLC_BYPASS, #undef LLC_BYPASS, inc/champsim.h
+useDRCBypass, #define DRC_BYPASS, #undef DRC_BYPASS, inc/champsim.h
+
+branchPredictor, BRANCH=, BRANCH=$$, scripts/set_key_unit.sh
+l1iPrefetcher, L1I_PREFETCHER=, L1I_PREFETCHER=$$, scripts/set_key_unit.sh
+l1dPrefetcher, L1D_PREFETCHER=, L1D_PREFETCHER=$$, scripts/set_key_unit.sh
+l2cPrefetcher, L2C_PREFETCHER=, L2C_PREFETCHER=$$, scripts/set_key_unit.sh
+llcPrefetcher, LLC_PREFETCHER=, LLC_PREFETCHER=$$, scripts/set_key_unit.sh
+llcReplacePolicy, LLC_REPLACEMENT=, LLC_REPLACEMENT=$$, scripts/set_key_unit.sh
+
+# CPU Basic Settings
+numCPUs, #define NUM_CPUS, #define NUM_CPUS $$, inc/champsim.h
+cpuFreq, #define cpuFreq, #define cpuFreq $$, inc/champsim.h
+pageSize, #define PAGE_SIZE, #define PAGE_SIZE $$, inc/champsim.h
+log2PageSize, #define LOG2_PAGE_SIZE, #define LOG2_PAGE_SIZE $$, inc/champsim.h
+
+# CPU Detailed Settings
+fetchWidth, #define FETCH_WIDTH, #define FETCH_WIDTH $$, inc/ooo_cpu.h
+decodeWidth, #define DECODE_WIDTH, #define DECODE_WIDTH $$, inc/ooo_cpu.h
+execWidth, #define EXEC_WIDTH, #define EXEC_WIDTH $$, inc/ooo_cpu.h
+loadQueueWidth, #define LQ_WIDTH, #define LQ_WIDTH $$, inc/ooo_cpu.h
+storeQueueWidth, #define SQ_WIDTH, #define SQ_WIDTH $$, inc/ooo_cpu.h
+retireWidth, #define RETIRE_WIDTH, #define RETIRE_WIDTH $$, inc/oo_cpu.h
+
+schedulerSize, #define SCHEDULER_SIZE, #define SCHEDULER_SIZE $$, inc/ooo_cpu.h
+branchMissPredPenalty, #define BRANCH_MISPREDICT_PENALTY, #define BRANCH_MISPREDICT_PENALTY $$, inc/ooo_cpu.h
+robSize, #define ROB_SIZE, #define ROB_SIZE $$, inc/instruction.h
+loadQueueSize, #define LQ_SIZE, #define LQ_SIZE $$, inc/instruction.h
+storeQueueSize, #define SQ_SIZE, #define SQ_SIZE $$, inc/instruction.h
+
+# Cache Settings
+cacheBlockSize, #define BLOCK_SIZE, #define BLOCK_SIZE $$, inc/champsim.h
+log2CacheBlockSize, #define LOG2_BLOCK_SIZE, #define LOG2_BLOCK_SIZE $$, inc/champsim.h
+cacheReadPorts, #define MAX_READ_PER_CYCLE, #define MAX_READ_PER_CYCLE $$, inc/champsim.h
+cacheWritePorts, #define MAX_FILL_PER_CYCLE, #define MAX_FILL_PER_CYCLE $$, inc/champsim.h
+cacheReqInflight, #define INFLIGHT, #define INFLIGHT $$, inc/champsim.h
+cacheReqCompleted, #define COMPLETED, #define COMPLETED $$, inc/champsim.h
+
+# L1 ICache Settings
+l1iSets, #define L1I_SET, #define L1I_SET $$, inc/cache.h
+l1iWays, #define L1I_WAY, #define L1I_WAY $$, inc/cache.h
+l1iReadQueueSize, #define L1I_RQ_SIZE, #define L1I_RQ_SIZE $$, inc/cache.h
+l1iWriteQueueSize, #define L1I_WQ_SIZE, #define L1I_WQ_SIZE $$, inc/cache.h
+l1iPrefetchQueueSize, #define L1I_PQ_SIZE, #define L1I_PQ_SIZE $$, inc/cache.h
+l1iMSHRSize, #define L1I_MSHR_SIZE, #define L1I_MSHR_SIZE $$, inc/cache.h
+l1iLatency, #define L1I_LATENCY, #define L1I_LATENCY $$, inc/cache.h
+
+# L1 DCache Settings
+l1dSets, #define L1D_SET, #define L1D_SET $$, inc/cache.h
+l1dWays, #define L1D_WAY, #define L1D_WAY $$, inc/cache.h
+l1dReadQueueSize, #define L1D_RQ_SIZE, #define L1D_RQ_SIZE $$, inc/cache.h
+l1dWriteQueueSize, #define L1D_WQ_SIZE, #define L1D_WQ_SIZE $$, inc/cache.h
+l1dPrefetchQueueSize, #define L1D_PQ_SIZE, #define L1D_PQ_SIZE $$, inc/cache.h
+l1dMSHRSize, #define L1D_MSHR_SIZE, #define L1D_MSHR_SIZE $$, inc/cache.h
+l1dLatency, #define L1D_LATENCY, #define L1D_LATENCY $$, inc/cache.h
+
+# L2 Cache Settings
+l2cSets, #define L2C_SET, #define L2C_SET $$, inc/cache.h
+l2cWays, #define L2C_WAY, #define L2C_WAY $$, inc/cache.h
+l2cReadQueueSize, #define L2C_RQ_SIZE, #define L2C_RQ_SIZE $$, inc/cache.h
+l2cWriteQueueSize, #define L2C_WQ_SIZE, #define L2C_WQ_SIZE $$, inc/cache.h
+l2cPrefetchQueueSize, #define L2C_PQ_SIZE, #define L2C_PQ_SIZE $$, inc/cache.h
+l2cMSHRSize, #define L2C_MSHR_SIZE, #define L2C_MSHR_SIZE $$, inc/cache.h
+l2cLatency, #define L2C_LATENCY, #define L2C_LATENCY $$, inc/cache.h
+
+# LLC Cache Settings
+llcSets, #define LLC_SET, #define LLC_SET $$, inc/cache.h
+llcWays, #define LLC_WAY, #define LLC_WAY $$, inc/cache.h
+llcReadQueueSize, #define LLC_RQ_SIZE, #define LLC_RQ_SIZE $$, inc/cache.h
+llcWriteQueueSize, #define LLC_WQ_SIZE, #define LLC_WQ_SIZE $$, inc/cache.h
+llcPrefetchQueueSize, #define LLC_PQ_SIZE, #define LLC_PQ_SIZE $$, inc/cache.h
+llcMSHRSize, #define LLC_MSHR_SIZE, #define LLC_MSHR_SIZE $$, inc/cache.h
+llcLatency, #define LLC_LATENCY, #define LLC_LATENCY $$, inc/cache.h
+
+# ITLB Settings
+itlbSets, #define ITLB_SET, #define ITLB_SET $$, inc/cache.h
+itlbWays, #define ITLB_WAY, #define ITLB_WAY $$, inc/cache.h
+itlbReadQueueSize, #define ITLB_RQ_SIZE, #define ITLB_RQ_SIZE $$, inc/cache.h
+itlbWriteQueueSize, #define ITLB_WQ_SIZE, #define ITLB_WQ_SIZE $$, inc/cache.h
+itlbPrefetchQueueSize, #define ITLB_PQ_SIZE, #define ITLB_PQ_SIZE $$, inc/cache.h
+itlbMSHRSize, #define ITLB_MSHR_SIZE, #define ITLB_MSHR_SIZE $$, inc/cache.h
+itlbLatency, #define ITLB_LATENCY, #define ITLB_LATENCY $$, inc/cache.h
+
+# DTLB Settings
+dtlbSets, #define DTLB_SET, #define DTLB_SET $$, inc/cache.h
+dtlbWays, #define DTLB_WAY, #define DTLB_WAY $$, inc/cache.h
+dtlbReadQueueSize, #define DTLB_RQ_SIZE, #define DTLB_RQ_SIZE $$, inc/cache.h
+dtlbWriteQueueSize, #define DTLB_WQ_SIZE, #define DTLB_WQ_SIZE $$, inc/cache.h
+dtlbPrefetchQueueSize, #define DTLB_PQ_SIZE, #define DTLB_PQ_SIZE $$, inc/cache.h
+dtlbMSHRSize, #define DTLB_MSHR_SIZE, #define DTLB_MSHR_SIZE $$, inc/cache.h
+dtlbLatency, #define DTLB_LATENCY, #define DTLB_LATENCY $$, inc/cache.h
+
+# Second Level TLB Settings
+stlbSets, #define STLB_SET, #define STLB_SET $$, inc/cache.h
+stlbWays, #define STLB_WAY, #define STLB_WAY $$, inc/cache.h
+stlbReadQueueSize, #define STLB_RQ_SIZE, #define STLB_RQ_SIZE $$, inc/cache.h
+stlbWriteQueueSize, #define STLB_WQ_SIZE, #define STLB_WQ_SIZE $$, inc/cache.h
+stlbPrefetchQueueSize, #define STLB_PQ_SIZE, #define STLB_PQ_SIZE $$, inc/cache.h
+stlbMSHRSize, #define STLB_MSHR_SIZE, #define STLB_MSHR_SIZE $$, inc/cache.h
+stlbLatency, #define STLB_LATENCY, #define STLB_LATENCY $$, inc/cache.h
+
+# DRAM Basic Settings
+dramChannels, #define DRAM_CHANNELS, #define DRAM_CHANNELS $$, inc/champsim.h
+log2DramChannels, #define LOG2_DRAM_CHANNELS, #define LOG2_DRAM_CHANNELS, inc/champsim.h
+dramRanks, #define DRAM_RANKS, #define DRAM_RANKS $$, inc/champsim.h
+log2DramRanks, #define LOG2_DRAM_RANKS, #define LOG2_DRAM_RANKS $$, inc/champsim.h
+dramBanks, #define DRAM_BANKS, #define DRAM_BANKS $$, inc/champsim.h
+log2DramBanks, #define LOG2_DRAM_BANKS, #define LOG2_DRAM_BANKS $$, inc/champsim.h
+dramRows, #define DRAM_ROWS, #define DRAM_ROWS $$, inc/champsim.h
+log2DramRows, #define LOG2_DRAM_ROWS, #define LOG2_DRAM_ROWS $$, inc/champsim.h
+dramColumns, #define DRAM_COLUMNS, #define DRAM_COLUMNS $$, inc/champsim.h
+log2DramColumns, #define LOG2_DRAM_COLUMNS, #define LOG2_DRAM_COLUMNS ##, inc/champsim.h
+
+# DRAM Detailed Settings
+dramIOFreq, #define DRAM_IO_FREQ, #define DRAM_IO_FREQ $$, inc/champsim.h
+dramChannelWidth, #define DRAM_CHANNEL_WIDTH, #define DRAM_CHANNEL_WIDTH $$, inc/dram_controller.h
+dramWriteQueueSize, #define DRAM_WQ_SIZE, #define DRAM_WQ_SIZE $$, inc/dram_controller.h
+dramReadQueueSize, #define DRAM_RQ_SIZE, #define DRAM_RQ_SIZE $$, inc/dram_controller.h
+tRPDramNanoSecond, #define tRP_DRAM_NANOSECONDS, #define tRP_DRAM_NANOSECONDS $$, inc/dram_controller.h
+tRCDramNanoSecond, #define tRCD_DRAM_NANOSECONDS, #define tRCD_DRAM_NANOSECONDS $$, inc/dram_controller.h
+tCASramNanoSecond, #define tCAS_DRAM_NANOSECONDS, #define tCAS_DRAM_NANOSECONDS $$, inc/dram_controller.h

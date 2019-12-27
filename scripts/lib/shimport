@@ -1,0 +1,184 @@
+#! /bin/bash
+
+_shimportHelp(){
+    if [ x$1 = x ]
+    then
+        echo "Import error: No shh file specified!"
+        exit 1
+    elif [ ! -f $1 ]
+    then
+        echo "Import error: No such file \"$1\""
+        exit 1
+    else
+        _tempNameSpace=help_$(md5sum $1 | awk '{print $1}')
+        shimport $1 as $_tempNameSpace
+        ${_tempNameSpace}_help
+    fi
+}
+
+_getAbsolutePath(){
+    if [ $# = 0 ]
+    then
+        echo "Import error: Internal error occured!"
+        exit 1
+    fi
+
+    if [ -d $1 ]
+    then
+        _oldPath=$PWD
+        cd $1; echo $PWD
+        cd $_oldPath
+    elif [ -f $1 ]
+    then
+        _oldPath=$PWD
+        cd $(dirname $1); echo $PWD/`basename $1`
+        cd $_oldPath
+    else
+        echo "Import error: No such file or directory \"$1\""
+        exit 1
+    fi
+}
+
+_shimport(){
+    if [ $# != 1 -a $# != 3 ]
+    then
+        echo "Import error: Syntax error with shimport!"
+        exit 1
+    fi
+
+    if [ -f $1 ]
+    then
+        _resultFile=$(_getAbsolutePath $1)
+        _resultFileMd5sum=$(md5sum $1 | awk '{print $1}')
+    elif [ "x`echo $1 | grep /`" = x ]
+    then
+        for _dir in $_IMPORT_PATH_
+        do 
+            _resultFile=$(find $_dir -name "$1")
+            if [ x$_resultFile = x ]
+            then 
+                _resultMd5sum=$(md5sum $_resultFile | awk '{print $1}')
+                break
+            fi
+        done
+        if [ x$_resultFile = x ]
+        then
+            echo "Import error: Can not locate file \"$1\""
+            exit 1
+        else _resultFileMd5sum=$(md5sum $_resultFile | awk '{print $1}')
+        fi
+    else
+        echo "Import error: No such file \"$1\"!"
+        exit 1
+    fi
+    
+    cp $_resultFile /tmp/shimport_temp_$_resultFileMd5sum.sh
+    if [ $# = 3 ]
+    then
+        _anonymousId=$_resultFileMd5sum
+        if [ $2 != as ]
+        then 
+            echo "Import error: Syntax error with shimport!"
+            exit 1
+        elif [ "x`echo ${_NAMESPACE_} | grep $3`" != x ]
+        then
+            echo "Import error: Namespace \"$3\" redefined!"
+            exit 1
+        else
+            _NAMESPACE_="${_NAMESPACE_} $3"
+            sed -i -e "s/__L/${3}_${_anonymousId}_/g" \
+                    -e "s/__G/${3}_/g" \
+                    /tmp/shimport_temp_$_resultFileMd5sum.sh
+        fi
+    else
+        _anonymousId=anonymous_$_resultFileMd5sum
+        if [ "x`echo ${_NAMESPACE_} | grep $_anonymousId`" != x ]
+        then
+            echo "Import warning: File \"$_resultFile\" reimported with anonymous namespace!"
+            return
+        else
+            _NAMESPACE_="${_NAMESPACE_} $_anonymousId"
+            sed -i -e "s/__L/${_anonymousId}_/g" -e "s/__G//g" \
+                    /tmp/shimport_temp_$_resultFileMd5sum.sh
+        fi
+    fi
+    _IMPORT_PATH_BACKUP_[$_SHIMPORT_]=$_IMPORT_PATH_
+    _IMPORT_PATH_="`dirname $_resultFile` $_IMPORT_PATH_"
+    _SHIMPORT_=$[_SHIMPORT_ + 1]
+    source /tmp/shimport_temp_$_resultFileMd5sum.sh
+    _SHIMPORT_=$[_SHIMPORT_ - 1]
+    _IMPORT_PATH_=${_IMPORT_PATH_BACKUP_[$_SHIMPORT_]}
+}
+
+if [ x$_SHIMPORT_ = x ]
+then 
+    shopt -s  expand_aliases 
+    alias shimport="_shimport"
+    alias shimport-help="_shimportHelp"
+    _IMPORT_PATH_=$SHIMPORT_PATH
+    _SHIMPORT_=1
+fi
+
+unset _newPaths
+for _dir in $*
+do _newPaths="$_newPaths_ $(_getAbsolutePath $_dir)"
+done
+_IMPORT_PATH_="$_newPaths $_IMPORT_PATH_"
+
+###############################################################################
+# Readme text for shimport:
+# ### Author: Rock Lee ###
+
+# "shimport" is a import tool for shell script, which has similar features as
+# include in C/C++. To use shimport you need
+# following the rules listed below.
+# 1. Use "source shimport <IMPORT_PATH>" first before use shimport!
+# 2. You can use shimport like these after step1:
+#     shimport adb_funcs.shh # shimport with an empty namespace
+#     shimport color_scheme.shh as cs # shimport with a namespace as "cs"
+#    shimport /home/lee/shhs/basic_utils.shh # shimport with absolute path
+# 3. We will try to find the shh file from the directory, which holds the shell
+#    script has sourced shimport. If the file cannot be found, then other
+#    directories given by <IMPORT_PATH> will be serached.
+
+# "shimport" can only work well for those shell scripts with the correct format
+# and extension(shh). We provide two name prefixes to implement variable and 
+# function's isolation:
+# 1. __L
+#     Variables or functions with prefix like "__L" will be hidden after shimport.
+# You may use this for those variables or functions that may have the risk of 
+# name conflicts. Of course, local variables or functions can still be seen by 
+# the functions from the same scripts.
+# 2. __G
+#     You will have to use this prefix before any function definations to make 
+# sure that they can be shimported and won't have the risk of name conflict. 
+# Otherwise, another function with the same name, which has alredy been 
+# shimported will be replaced.
+
+# An example function defination is listed below:
+
+# ### shell script ###
+# __LgetId(){
+#     __Lretval=$[$1 + 2]
+# }
+# 
+# __GsetId(){
+#     __LgetId $1
+#     __Gid=$__Lretval
+# }
+# ### shell script ###
+
+# How to use the functions or variable imported by shimport? We will use the 
+# example given above for explanation:
+
+# ### shell script ###
+# source shimport
+# shimport ./test.sh as test
+# shimport test.sh
+# 
+# test_setId 5
+# echo $test_id # 7
+# setId 6
+# echo $id # 8
+# ### shell script ###
+###############################################################################

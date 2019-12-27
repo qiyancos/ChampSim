@@ -1,0 +1,184 @@
+#! /bin/bash
+__Ghelp(){
+	echo "This function helps to print word with formats specified by arguments!"
+	echo "Usage: NAMESPACE_echo_color [font format] [echo arguments] -t text"
+	echo "    [font format]"
+	echo "       <Font Color> black, red, green, yellow, blue, purple, dark_green, white"
+	echo "       <Background Color > back_black, back_red, back_green, back_yellow"	
+	echo "           back_blue, back_purple, back_dark_green, back_white"
+	echo "       <Font Type>* bold, underline, flash"
+	echo "       '*' respects that this kind of arguments can be overlay with each other!"
+	echo "    [echo arguments] These arguments will be directly passed to echo!"
+}
+
+#################################
+
+__GRUNMSG(){
+	__Gecho_color blue bold -t "$*"
+}
+
+__GRUNMSGN(){
+	__Gecho_color blue bold -n -t "$*"
+}
+
+__GRUNMSGL(){
+	__Gecho_color blue -t "$*"
+}
+
+__GRUNMSGLN(){
+	__Gecho_color blue -n -t "$*"
+}
+
+#################################
+
+__GWARNTL(){
+	__Gecho_color yellow -t "$*"
+}
+
+__GWARNTLN(){
+	__Gecho_color yellow -n -t "$*"
+}
+
+__GWARNT(){
+	__Gecho_color yellow bold -t "$*"
+}
+
+__GWARNTN(){
+	__Gecho_color yellow bold -n -t "$*"
+}
+
+#################################
+
+__GERRORTL(){
+	__Gecho_color red -t "$*"
+}
+
+__GERRORTLN(){
+	__Gecho_color red -n -t "$*"
+}
+
+__GERRORT(){
+	__Gecho_color red bold -t "$*"
+}
+
+__GERRORTN(){
+	__Gecho_color red bold -n -t "$*"
+}
+
+#################################
+
+__GWARN(){
+	__Gecho_color yellow bold -n -t "<Warning>"
+	echo " $*"
+}
+
+__GERROR(){
+	__Gecho_color red bold -n -t "<Error>"
+	echo " $*"
+}
+
+#################################
+
+__LaddColor(){
+	if [ $1 = 0 ]
+	then 
+		if [ $__LcolorFlag = 0 ]
+		then
+			__Ladd=$2
+			__LcolorFlag=1
+			__LargFlag=1
+		else 
+			echo "Too many arguments for <Font Color>. Use -h for help!"
+			exit 1
+		fi
+	fi
+	
+	if [ $1 = 1 ]
+	then
+		if [ $__LbackgroundFlag = 0 ]
+		then 
+			__Ladd=$[$2 + 10]
+			__LbackgroundFlag=1
+			__LargFlag=1
+		else 
+			echo "Too many arguments for <Background Color>. Use -h for help!"
+			exit 1
+		fi
+	fi
+
+	if [ $1 = 2 ]
+	then 
+		__Ladd=$2
+		__LargFlag=1
+	fi
+
+	if [ ${__Ladd}x != x ]
+	then
+		if [ ${__Lstart}x = x ]
+		then __Lstart="$__Ladd"
+		else __Lstart="$__Lstart;$__Ladd"
+		fi
+	fi
+}
+
+__Gecho_color() {
+	unset __Lstart
+	unset __Ladd
+	unset __LechoArgs
+    __LcolorFlag=0
+    __LbackgroundFlag=0
+    __LargFlag=0
+	__LargCount=1
+    
+	for __Larg in $*
+    do
+	    if [ ${__Larg:0:1} = - -a $__Larg != -t -a $__Larg != -e ]
+	    then
+		    __LechoArgs="$__LechoArgs $__Larg"
+		    __LargCount=$[__LargCount + 1]
+		    continue
+	    fi
+
+	    __Lcheck=(`echo "$__Larg" | sed 's/_/ /g'`)
+	    if [ ${__Lcheck[0]}x = backx ]
+	    then 
+		    __Lcount=${#__Larg}
+		    __Larg=${__Larg:5:$[__Lcount - 5]}
+		    __Lbackground=1
+	    else __Lbackground=0
+	    fi
+
+	    case $__Larg in
+	    black) __LaddColor $__Lbackground 30;;
+	    red) __LaddColor $__Lbackground 31;;
+	    green) __LaddColor $__Lbackground 32;;
+	    yellow) __LaddColor $__Lbackground 33;;
+	    blue) __LaddColor $__Lbackground 34;;
+	    purple) __LaddColor $__Lbackground 35;;
+	    dark_green) __LaddColor $__Lbackground 36;;
+	    white) __LaddColor $__Lbackground 37;;
+	    bold) __LaddColor 2 1;;
+	    underline) __LaddColor 2 4;;
+	    flash) __LaddColor 2 5;;
+	    -t)
+		    shift $__LargCount
+		    __Ltext=$*
+		    break;;
+	    *) 
+		    echo "Bad argument [$__Larg]! Use -h for help"
+		    exit 1;;
+	    esac
+	    __LargCount=$[__LargCount + 1]
+    done
+
+    if [ "${__Ltext}x" = x ]
+    then 
+	    echo "Text must not be empty. Use -h for help!"
+	    exit 1
+    fi
+
+    if [ $__LargFlag = 0 ]
+    then echo $__LechoArgs "$__LargFlag $__Ltext"
+    else echo -e $__LechoArgs "\033[${__Lstart}m$__Ltext\033[0m"
+    fi
+}

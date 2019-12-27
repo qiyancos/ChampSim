@@ -20,7 +20,7 @@
 #include <iomanip>
 
 // USEFUL MACROS
-//#define DEBUG_PRINT
+// #define DEBUG_PRINT
 #define SANITY_CHECK
 #define LLC_BYPASS
 #define DRC_BYPASS
@@ -48,6 +48,7 @@
 #define INFLIGHT 1
 #define COMPLETED 2
 
+// Cache Fill Type
 #define FILL_L1    1
 #define FILL_L2    2
 #define FILL_LLC   4

@@ -1,156 +1,134 @@
 #!/bin/bash
 root=`dirname $0`
 cd $root/..
+root=$PWD
+source $root/scripts/lib/shimport $root/scripts/lib
+shimport color_scheme.shh
+# shimport basic_func.shh
 
-if [ $# != 7 -a $# != 1 ]
+if [ x$1 = x -o x$1 = x-h ]
 then
-    echo "Illegal number of parameters($#)"
-    echo "Usage: ./build_champsim.sh [Options] [branch_pred] [l1d_pref] [l2c_pref] [llc_pref] [llc_repl] [num_core]"
+    echo "Usage: ./build_champsim.sh [Options] [Config Files]"
     echo "    -l, --list    List all the available branch predictors, prefetchers, replace policies"
+    echo "    Config Files  Config files must be given to modify system settings."
+    echo "                  default: $root/scripts/config/system.ini"
     exit 1
 fi
 
 if [ $# = 1 ] && [ $1 = -l -o $1 = --list ]
 then
     name=`ls ./branch | grep "bpred.cpp" | sed 's/\.bpred\.cpp//g'`
-    echo -n "-- Branch Predictor: "; echo $name
+    WARNTLN "-- Branch Predictor: "; echo $name
     name=`ls ./prefetcher | grep "l1i_pref.cpp" | sed 's/\.l1i_pref\.cpp//g'`
-    echo -n "-- Prefetcher(L1 ICache): "; echo $name
+    WARNTLN "-- Prefetcher(L1 ICache): "; echo $name
     name=`ls ./prefetcher | grep "l1d_pref.cpp" | sed 's/\.l1d_pref\.cpp//g'`
-    echo -n "-- Prefetcher(L1 DCache): "; echo $name
+    WARNTLN "-- Prefetcher(L1 DCache): "; echo $name
     name=`ls ./prefetcher | grep "l2c_pref.cpp" | sed 's/\.l2c_pref\.cpp//g'`
-    echo -n "-- Prefetcher(L2 Cache): "; echo $name
+    WARNTLN "-- Prefetcher(L2 Cache): "; echo $name
     name=`ls ./prefetcher | grep "llc_pref.cpp" | sed 's/\.llc_pref\.cpp//g'`
-    echo -n "-- Prefetcher(Last Level Cache): "; echo $name
+    WARNTLN "-- Prefetcher(Last Level Cache): "; echo $name
     name=`ls ./replacement | grep "llc_repl.cpp" | sed 's/\.llc_repl\.cpp//g'`
-    echo -n "-- Replace Policy: "; echo $name
+    WARNTLN "-- Replace Policy: "; echo $name
     exit 0
 fi
 
-# ChampSim configuration
-BRANCH=$1           # branch/*.bpred.cpp
-L1I_PREFETCHER=$2   # prefetcher/*.l1i_pref.cpp
-L1D_PREFETCHER=$3   # prefetcher/*.l1d_pref.cpp
-L2C_PREFETCHER=$4   # prefetcher/*.l2c_pref.cpp
-LLC_PREFETCHER=$5   # prefetcher/*.llc_pref.cpp
-LLC_REPLACEMENT=$6  # replacement/*.llc_repl.cpp
-NUM_CORE=$7         # tested up to 8-core system
-
-############## Some useful macros ###############
-BOLD=$(tput bold)
-NORMAL=$(tput sgr0)
-#################################################
-
-# Sanity check
-if [ ! -f ./branch/${BRANCH}.bpred.cpp ]; then
-    echo "[ERROR] Cannot find branch predictor"
-	echo "[ERROR] Possible branch predictors from branch/*.bpred.cpp "
-    find branch -name "*.bpred.cpp"
-    exit 1
+if [ $# = 0 ]
+then configs=$root/scripts/config/system.ini
+else configs="$*"
 fi
 
-if [ ! -f ./prefetcher/${L1I_PREFETCHER}.l1i_pref.cpp ]; then
-    echo "[ERROR] Cannot find L1I prefetcher"
-	echo "[ERROR] Possible L1I prefetchers from prefetcher/*.l1i_pref.cpp "
-    find prefetcher -name "*.l1i_pref.cpp"
-    exit 1
-fi
-
-if [ ! -f ./prefetcher/${L1D_PREFETCHER}.l1d_pref.cpp ]; then
-    echo "[ERROR] Cannot find L1D prefetcher"
-	echo "[ERROR] Possible L1D prefetchers from prefetcher/*.l1d_pref.cpp "
-    find prefetcher -name "*.l1d_pref.cpp"
-    exit 1
-fi
-
-if [ ! -f ./prefetcher/${L2C_PREFETCHER}.l2c_pref.cpp ]; then
-    echo "[ERROR] Cannot find L2C prefetcher"
-	echo "[ERROR] Possible L2C prefetchers from prefetcher/*.l2c_pref.cpp "
-    find prefetcher -name "*.l2c_pref.cpp"
-    exit 1
-fi
-
-if [ ! -f ./prefetcher/${LLC_PREFETCHER}.llc_pref.cpp ]; then
-    echo "[ERROR] Cannot find LLC prefetcher"
-	echo "[ERROR] Possible LLC prefetchers from prefetcher/*.llc_pref.cpp "
-    find prefetcher -name "*.llc_pref.cpp"
-    exit 1
-fi
-
-if [ ! -f ./replacement/${LLC_REPLACEMENT}.llc_repl.cpp ]; then
-    echo "[ERROR] Cannot find LLC replacement policy"
-	echo "[ERROR] Possible LLC replacement policy from replacement/*.llc_repl.cpp "
-    find replacement -name "*.llc_repl.cpp"
-    exit 1
-fi
-
-# Check num_core
-re='^[0-9]+$'
-if ! [[ $NUM_CORE =~ $re ]] ; then
-    echo "[ERROR]: num_core is NOT a number" >&2;
-    exit 1
-fi
-
-# Check for multi-core
-if [ "$NUM_CORE" -gt "1" ]; then
-    echo "Building multi-core ChampSim..."
-    sed -i.bak 's/\<NUM_CPUS 1\>/NUM_CPUS '${NUM_CORE}'/g' inc/champsim.h
-#	sed -i.bak 's/\<DRAM_CHANNELS 1\>/DRAM_CHANNELS 2/g' inc/champsim.h
-#	sed -i.bak 's/\<DRAM_CHANNELS_LOG2 0\>/DRAM_CHANNELS_LOG2 1/g' inc/champsim.h
-else
-    if [ "$NUM_CORE" -lt "1" ]; then
-        echo "Number of core: $NUM_CORE must be greater or equal than 1"
-        exit 1
-    else
-        echo "Building single-core ChampSim..."
+RUNMSG ">> Applying Settings..."
+for config in $configs
+do
+    opFile=`echo $config | sed 's/.*ini/\1op/'`
+    if [ ! -f $config ]
+    then
+        ERROR "No such file or directory \"$config\""
+        exit -1
+    elif [ ! -f $opFile ]
+    then
+        ERROR "No matched operation file \"$opFIle\""
+        exit -1
     fi
-fi
-echo
+    source bash $config
+    lineNum=0
+    while read operation
+    do
+        lineNum=$[lineNum + 1]
+        operation=`echo $operation | sed 's/[ \t]*\(.*\)/\1/g'`
+        if [ x$operation = x ] || [ x${operation:0:1} = x# ] 
+        then continue
+        fi
+        operation=(`echo $operation | sed -e 's/ /@/g' -e 's/,/ /g'`)
+        paramName=`echo ${operation[0]} | sed 's/@/ /g'`
+        originString=`echo ${operation[1]} | sed 's/@/ /g'`
+        targetFile=`echo ${operation[3]} | sed 's/@/ /g'`
+        paramVal=`eval echo \$$paramName`
+        newString=`echo ${operation[2]} | sed -e 's/@/ /g' -e "s/\$\$/$paramVal/g"`
+        if [ x$paramVal = x ]
+        then
+            WARN "Param $paramName not defined! Operation is skipped."
+            continue
+        elif [ x$targetFile = x ] || [ ! -f $targetFile]
+        then
+            ERRORN "No target file specified or file not exits \"$targetFile\""
+            echo "Line $lineNum in file $opFile."
+            exit -1
+        fi
+        RUNMSGL "-- Param: $paramName; Value $paramVal"
+        if [ ${paramName:0:3} = use ]
+        then
+            if [[ $paramVal =~ ([yY]es|[nN]o|YES|NO ]]
+            then
+                if [[ ${paramVal:0:1} =~ [yY] ]]
+                then
+                    #eval "sed \"/$newString/c\ $originString\" $targetFile"
+                    echo sed \"/$newString/c\ $originString\" $targetFile
+                else
+                    #eval "sed \"/$originString/c\ $newString\" $targetFile"
+                    echo sed \"/$originString/c\ $newString\" $targetFile
+                fi
+            else
+                ERROR "Param $paramName illegal!"
+                WARN "Param with prefix like \"use\" must be defined as Yes/No."
+                exit -1
+            fi
+        else
+            #eval "sed \"/$originString/c\ $newString\" $targetFile"
+            echo sed \"/$originString/c\ $newString\" $targetFile
+        fi
+    done < $opFile
+done
+RUNMSG "-- Settings Apply Finished."
 
-# Change prefetchers and replacement policy
-cp branch/${BRANCH}.bpred.cpp branch/branch_predictor.cc
-cp prefetcher/${L1I_PREFETCHER}.l1i_pref.cpp prefetcher/l1i_prefetcher.cc
-cp prefetcher/${L1D_PREFETCHER}.l1d_pref.cpp prefetcher/l1d_prefetcher.cc
-cp prefetcher/${L2C_PREFETCHER}.l2c_pref.cpp prefetcher/l2c_prefetcher.cc
-cp prefetcher/${LLC_PREFETCHER}.llc_pref.cpp prefetcher/llc_prefetcher.cc
-cp replacement/${LLC_REPLACEMENT}.llc_repl.cpp replacement/llc_replacement.cc
+source bash $root/scripts/set_key_unit.sh
+binName="${BRANCH}-${L1I_PREFETCHER}-${L1D_PREFETCHER}"
+binName="$binName-${L2C_PREFETCHER}-${LLC_PREFETCHER}"
+binName="$binName-${LLC_REPLACEMENT}-${numCPUs}core-champsim"
 
+RUNMSG "-- Building ChampSim..."
 # Build
-mkdir -p bin
 rm -f bin/champsim
 make clean
+mkdir -p bin
 make
 
 # Sanity check
 echo ""
 if [ ! -f bin/champsim ]; then
-    echo "${BOLD}ChampSim build FAILED!"
-    echo ""
-    exit 1
+    ERROR "ChampSim build FAILED!"
+    exit -1
 fi
 
-echo "${BOLD}ChampSim is successfully built"
-echo "Branch Predictor: ${BRANCH}"
-echo "L1I Prefetcher: ${L1I_PREFETCHER}"
-echo "L1D Prefetcher: ${L1D_PREFETCHER}"
-echo "L2C Prefetcher: ${L2C_PREFETCHER}"
-echo "LLC Prefetcher: ${LLC_PREFETCHER}"
-echo "LLC Replacement: ${LLC_REPLACEMENT}"
-echo "Cores: ${NUM_CORE}"
-BINARY_NAME="${BRANCH}-${L1I_PREFETCHER}-${L1D_PREFETCHER}-${L2C_PREFETCHER}-${LLC_PREFETCHER}-${LLC_REPLACEMENT}-${NUM_CORE}core"
-echo "Binary: bin/${BINARY_NAME}"
+RUNMSG "-- ChampSim is successfully built."
+WARNT "-- Build Detail:"
+echo "    Cores: ${numCPUs}"
+echo "    Branch Predictor: ${BRANCH}"
+echo "    L1I Prefetcher: ${L1I_PREFETCHER}"
+echo "    L1D Prefetcher: ${L1D_PREFETCHER}"
+echo "    L2C Prefetcher: ${L2C_PREFETCHER}"
+echo "    LLC Prefetcher: ${LLC_PREFETCHER}"
+echo "    LLC Replacement: ${LLC_REPLACEMENT}"
 echo ""
-mv bin/champsim bin/${BINARY_NAME}
-
-
-# Restore to the default configuration
-sed -i.bak 's/\<NUM_CPUS '${NUM_CORE}'\>/NUM_CPUS 1/g' inc/champsim.h
-#sed -i.bak 's/\<DRAM_CHANNELS 2\>/DRAM_CHANNELS 1/g' inc/champsim.h
-#sed -i.bak 's/\<DRAM_CHANNELS_LOG2 1\>/DRAM_CHANNELS_LOG2 0/g' inc/champsim.h
-
-cp branch/bimodal.bpred.cpp branch/branch_predictor.cc
-cp prefetcher/no.l1i_pref.cpp prefetcher/l1i_prefetcher.cc
-cp prefetcher/no.l1d_pref.cpp prefetcher/l1d_prefetcher.cc
-cp prefetcher/no.l2c_pref.cpp prefetcher/l2c_prefetcher.cc
-cp prefetcher/no.llc_pref.cpp prefetcher/llc_prefetcher.cc
-cp replacement/lru.llc_repl.cpp replacement/llc_replacement.cc
+mv bin/champsim bin/$binName
+RUNMSG "-- Saved as $root/bin/$binName"
